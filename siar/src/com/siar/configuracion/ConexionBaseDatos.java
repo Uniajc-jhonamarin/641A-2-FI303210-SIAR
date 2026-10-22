@@ -7,7 +7,7 @@
  *
  * @author Sebastian
  */
-package main.java.com.siar.configuracion;
+package com.siar.configuracion;
 
 import java.io.InputStream;
 import java.sql.Connection;
@@ -27,8 +27,8 @@ public class ConexionBaseDatos {
     }
 
     private void cargarPropiedades() {
-        // Carga el archivo database.properties ubicado en src/main/resources
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream("database.properties")) {
+        // Usamos getResourceAsStream con un "/" al inicio para buscar en la raíz del proyecto compilado
+        try (InputStream input = ConexionBaseDatos.class.getResourceAsStream("database.properties")) {
             if (input == null) {
                 System.err.println("Error: No se encontró el archivo database.properties");
                 return;
@@ -49,9 +49,23 @@ public class ConexionBaseDatos {
 
     // Provee una nueva conexión
     public Connection getConexion() throws SQLException {
+        try {
+            // Fuerza a la Máquina Virtual de Java a cargar el driver de MySQL
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            System.err.println("Error crítico: El archivo .jar del Driver de MySQL no se encontró en el Classpath.");
+            throw new SQLException("Driver de MySQL no encontrado", e);
+        }
+
         String url = propiedades.getProperty("db.url");
         String user = propiedades.getProperty("db.usuario");
         String pass = propiedades.getProperty("db.password");
+        
+        if (pass != null) {
+            pass = pass.trim();
+        } else {
+            pass = "";
+        }
         
         return DriverManager.getConnection(url, user, pass);
     }
