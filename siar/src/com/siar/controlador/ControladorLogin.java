@@ -2,20 +2,20 @@ package com.siar.controlador;
 
 import com.siar.servicio.AuthService;
 import com.siar.vista.VistaLogin;
-import com.siar.seguridad.SesionActual;
+import com.siar.vista.VistaDashboard;
 import javax.swing.JOptionPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class ControladorLogin {
-    
+
     private final VistaLogin vista;
     private final AuthService authService;
 
     public ControladorLogin(VistaLogin vista, AuthService authService) {
         this.vista = vista;
         this.authService = authService;
-        
+
         // Agregar el "escuchador" de eventos al botón de la vista
         this.vista.getBtnIngresar().addActionListener(new ActionListener() {
             @Override
@@ -43,16 +43,14 @@ public class ControladorLogin {
         boolean exito = authService.iniciarSesion(email, password);
 
         // 3. Respuesta de la vista
+        // 3. Respuesta de la vista
         if (exito) {
-            String nombreUsuario = SesionActual.getInstancia().getUsuarioActual().getNombre();
-            String rolUsuario = SesionActual.getInstancia().getUsuarioActual().getRol().getNombre();
-            
-            vista.mostrarMensaje("Bienvenido, " + nombreUsuario + " (" + rolUsuario + ")", "Login Exitoso", JOptionPane.INFORMATION_MESSAGE);
-            
             vista.dispose(); // Cierra la ventana de login
             
-            // TODO: Aquí abriremos el Dashboard Principal más adelante.
-            System.out.println("Transición al Menú Principal pendiente...");
+            // Instanciar y abrir el Dashboard Principal
+            VistaDashboard vistaDashboard = new VistaDashboard();
+            ControladorDashboard ctrlDashboard = new ControladorDashboard(vistaDashboard);
+            ctrlDashboard.iniciar();
             
         } else {
             vista.mostrarMensaje("Credenciales incorrectas o usuario inactivo.", "Error de autenticación", JOptionPane.ERROR_MESSAGE);

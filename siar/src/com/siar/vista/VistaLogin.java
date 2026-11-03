@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class VistaLogin extends JFrame {
-    
+
     private JTextField txtEmail;
     private JPasswordField txtPassword;
     private JButton btnIngresar;

@@ -8,8 +8,9 @@ import com.siar.vista.VistaLogin;
 import javax.swing.SwingUtilities;
 
 public class Main {
+
     public static void main(String[] args) {
-        
+
         // Ejecutar la interfaz gráfica en el hilo especial de eventos de Swing (EDT)
         SwingUtilities.invokeLater(new Runnable() {
             @Override
