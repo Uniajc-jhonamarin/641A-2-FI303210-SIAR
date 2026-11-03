@@ -6,7 +6,7 @@ import com.siar.seguridad.SesionActual;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class AuthService {
-    
+
     private final UsuarioRepository usuarioRepository;
 
     // Inyección de dependencias por constructor
@@ -28,7 +28,7 @@ public class AuthService {
             SesionActual.getInstancia().setUsuarioActual(usuario);
             return true;
         }
-        
+
         return false; // Contraseña incorrecta
     }
 

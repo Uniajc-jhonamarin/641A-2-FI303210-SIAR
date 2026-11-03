@@ -2,7 +2,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-
 /**
  *
  * @author Sebastian
@@ -16,7 +15,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 public class ConexionBaseDatos {
-    
+
     private static ConexionBaseDatos instancia;
     private Properties propiedades;
 
@@ -60,13 +59,13 @@ public class ConexionBaseDatos {
         String url = propiedades.getProperty("db.url");
         String user = propiedades.getProperty("db.usuario");
         String pass = propiedades.getProperty("db.password");
-        
+
         if (pass != null) {
             pass = pass.trim();
         } else {
             pass = "";
         }
-        
+
         return DriverManager.getConnection(url, user, pass);
     }
 
