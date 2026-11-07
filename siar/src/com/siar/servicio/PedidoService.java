@@ -40,8 +40,15 @@ public class PedidoService {
     public List<Pedido> obtenerPedidosPendientes() {
         return pedidoRepo.obtenerPedidosActivos();
     }
+    
+    public List<Pedido> obtenerPedidosFacturacion() {
+        return pedidoRepo.obtenerPedidosFacturacion();
+    }
 
     public List<com.siar.modelo.DetallePedido> obtenerDetalles(int idPedido) {
         return pedidoRepo.obtenerDetalles(idPedido);
     }
+    public List<Pedido> obtenerTodosLosPedidos() {
+    return pedidoRepo.obtenerTodosLosPedidos();
+}
 }

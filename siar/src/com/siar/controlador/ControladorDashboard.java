@@ -22,6 +22,9 @@ import java.awt.event.ActionListener;
 import javax.swing.JOptionPane;
 import java.awt.CardLayout;
 
+import com.siar.vista.VistaSeguimientoPedidos;
+import com.siar.controlador.ControladorSeguimientoPedidos;
+
 public class ControladorDashboard {
 
     private final VistaDashboard vista;
@@ -78,6 +81,11 @@ public class ControladorDashboard {
                 abrirModuloPedidos();
             }
         });
+        
+        vista.getMenuSeguimientoPedidos()
+     .addActionListener(
+        e -> abrirModuloSeguimientoPedidos()
+     );
 
         vista.getMenuCocina().addActionListener(e -> abrirModuloCocina());
         vista.getMenuFacturacion().addActionListener(e -> abrirModuloFacturacion());
@@ -141,4 +149,26 @@ public class ControladorDashboard {
         cl.show(vista.getPanelContenido(), "ModuloFacturacion");
     }
 
+    private void abrirModuloSeguimientoPedidos() {
+
+    VistaSeguimientoPedidos vistaSeguimiento =
+            new VistaSeguimientoPedidos();
+
+    new ControladorSeguimientoPedidos(
+            vistaSeguimiento,
+            new PedidoService(
+                    new PedidoRepositoryImpl()));
+
+    vista.getPanelContenido().add(
+            vistaSeguimiento,
+            "ModuloSeguimientoPedidos");
+
+    CardLayout cl =
+            (CardLayout) vista.getPanelContenido()
+                              .getLayout();
+
+    cl.show(
+            vista.getPanelContenido(),
+            "ModuloSeguimientoPedidos");
+}
 }

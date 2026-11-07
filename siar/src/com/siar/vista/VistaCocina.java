@@ -11,10 +11,37 @@ public class VistaCocina extends JPanel {
     private JTable tablaDetalles;
     private DefaultTableModel modeloDetalles;
     private JButton btnAvanzarEstado;
-
+    
+    private JLabel lblPendientes;
+    private JLabel lblPreparacion;
+    private JLabel lblListos;
+    private JLabel lblEntregados;
+    
     public VistaCocina() {
-        setLayout(new GridLayout(1, 2, 10, 10));
+        setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        JPanel panelIndicadores = new JPanel(
+            new GridLayout(1, 4, 10, 10));
+
+        lblPendientes = new JLabel("PENDIENTES: 0",
+            SwingConstants.CENTER);
+
+        lblPreparacion = new JLabel("PREPARANDO: 0",
+            SwingConstants.CENTER);
+
+        lblListos = new JLabel("LISTOS: 0",
+            SwingConstants.CENTER);
+
+        lblEntregados = new JLabel("ENTREGADOS: 0",
+            SwingConstants.CENTER);
+
+        panelIndicadores.add(lblPendientes);
+        panelIndicadores.add(lblPreparacion);
+        panelIndicadores.add(lblListos);
+        panelIndicadores.add(lblEntregados);
+
+        add(panelIndicadores, BorderLayout.NORTH);
 
         // Panel Izquierdo: Lista de Pedidos
         JPanel panelIzquierdo = new JPanel(new BorderLayout());
@@ -48,8 +75,14 @@ public class VistaCocina extends JPanel {
         btnAvanzarEstado.setEnabled(false);
         panelDerecho.add(btnAvanzarEstado, BorderLayout.SOUTH);
 
-        add(panelIzquierdo);
-        add(panelDerecho);
+        JSplitPane splitPane = new JSplitPane(
+            JSplitPane.HORIZONTAL_SPLIT,
+            panelIzquierdo,
+            panelDerecho);
+
+        splitPane.setResizeWeight(0.50);
+
+        add(splitPane, BorderLayout.CENTER);
     }
 
     public JTable getTablaPedidos() {
@@ -74,5 +107,20 @@ public class VistaCocina extends JPanel {
 
     public void mostrarMensaje(String msj, String titulo, int tipo) {
         JOptionPane.showMessageDialog(this, msj, titulo, tipo);
+    }
+    public JLabel getLblPendientes() {
+    return lblPendientes;
+    }
+
+    public JLabel getLblPreparacion() {
+    return lblPreparacion;
+    }
+
+    public JLabel getLblListos() {
+    return lblListos;
+    }
+
+    public JLabel getLblEntregados() {
+    return lblEntregados;
     }
 }

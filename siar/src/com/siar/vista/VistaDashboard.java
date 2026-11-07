@@ -8,6 +8,7 @@ public class VistaDashboard extends JFrame {
     private JMenuItem menuUsuarios;
     private JMenuItem menuProductos;
     private JMenuItem menuPedidos;
+    private JMenuItem menuSeguimientoPedidos;
     private JMenuItem menuFacturacion;
     private JMenuItem menuCerrarSesion;
     private JPanel panelContenido; // Contenedor dinámico para los módulos
@@ -41,12 +42,15 @@ public class VistaDashboard extends JFrame {
 
         // Menú Operación
         JMenu menuOperacion = new JMenu("Operación");
-        menuPedidos = new JMenuItem("Gestión de Pedidos");
-        menuCocina = new JMenuItem("Monitor de Cocina (KDS)");
-        menuFacturacion = new JMenuItem("Facturación y Caja");
-        menuOperacion.add(menuPedidos);
-        menuOperacion.add(menuCocina);
-        menuOperacion.add(menuFacturacion);
+menuPedidos = new JMenuItem("Gestión de Pedidos");
+menuSeguimientoPedidos = new JMenuItem("Seguimiento de Pedidos");
+menuCocina = new JMenuItem("Monitor de Cocina (KDS)");
+menuFacturacion = new JMenuItem("Facturación y Caja");
+
+menuOperacion.add(menuPedidos);
+menuOperacion.add(menuSeguimientoPedidos);
+menuOperacion.add(menuCocina);
+menuOperacion.add(menuFacturacion);
 
         barraMenu.add(menuSistema);
         barraMenu.add(menuAdmin);
@@ -76,6 +80,10 @@ public class VistaDashboard extends JFrame {
     public JMenuItem getMenuPedidos() {
         return menuPedidos;
     }
+    
+    public JMenuItem getMenuSeguimientoPedidos() {
+    return menuSeguimientoPedidos;
+}
 
     public JMenuItem getMenuFacturacion() {
         return menuFacturacion;

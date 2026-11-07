@@ -27,12 +27,48 @@ public class ControladorCocina {
     private void cargarPedidos() {
         vista.getModeloPedidos().setRowCount(0);
         pedidosActivos = pedidoService.obtenerPedidosPendientes();
+        
+        int pendientes = 0;
+        int preparando = 0;
+        int listos = 0;
+        int entregados = 0;
 
         for (Pedido p : pedidosActivos) {
             vista.getModeloPedidos().addRow(new Object[]{
                 p.getId(), "Mesa " + p.getNumeroMesa(), p.getEstadoActual().getNombre()
             });
+            switch (p.getEstadoActual().getNombre()) {
+
+            case "PENDIENTE":
+            pendientes++;
+            break;
+
+            case "EN_PREPARACION":
+            preparando++;
+            break;
+
+            case "LISTO":
+            listos++;
+            break;
+
+            case "ENTREGADO":
+            entregados++;
+            break;
+}
         }
+        
+        vista.getLblPendientes()
+        .setText("Pendientes: " + pendientes);
+
+        vista.getLblPreparacion()
+        .setText("Preparando: " + preparando);
+
+        vista.getLblListos()
+        .setText("Listos: " + listos);
+
+        vista.getLblEntregados()
+        .setText("Entregados: " + entregados);
+        
         limpiarDetalles();
     }
 
@@ -68,14 +104,33 @@ public class ControladorCocina {
     }
 
     private void avanzarEstado() {
-        if (pedidoSeleccionado != null) {
-            if (pedidoService.avanzarEstado(pedidoSeleccionado)) {
-                cargarPedidos();
-            } else {
-                vista.mostrarMensaje("Error al actualizar el estado en BD.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
+
+    if (pedidoSeleccionado != null) {
+
+        if (pedidoSeleccionado.getEstadoActual()
+                .getNombre()
+                .equals("ENTREGADO")) {
+
+            vista.mostrarMensaje(
+                "El pedido ya fue entregado.\n"
+              + "Debe ser procesado por Caja y Facturación.",
+                "Proceso Finalizado",
+                JOptionPane.INFORMATION_MESSAGE);
+
+            return;
+        }
+
+        if (pedidoService.avanzarEstado(pedidoSeleccionado)) {
+            cargarPedidos();
+        } else {
+            vista.mostrarMensaje(
+                "Error al actualizar el estado en BD.",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
         }
     }
+}
+
     
     private void limpiarDetalles() {
         if (vista.getModeloDetalles() != null) {

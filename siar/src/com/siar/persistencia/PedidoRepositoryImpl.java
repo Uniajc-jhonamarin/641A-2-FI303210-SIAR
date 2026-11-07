@@ -101,7 +101,10 @@ public class PedidoRepositoryImpl implements PedidoRepository {
     public List<Pedido> obtenerPedidosActivos() {
         List<Pedido> pedidos = new ArrayList<>();
         // Actualizamos el SELECT para que coincida con tus columnas reales
-        String sql = "SELECT id, mesa_id, estado, fecha_creacion FROM pedidos WHERE estado NOT IN ('FACTURADO', 'CANCELADO')";
+        String sql = "SELECT id, mesa_id, estado, fecha_creacion "
+           + "FROM pedidos "
+           + "WHERE estado IN "
+           + "('PENDIENTE','EN_PREPARACION','LISTO','ENTREGADO')";
         try (Connection conn = ConexionBaseDatos.getInstancia().getConexion(); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
@@ -127,6 +130,8 @@ public class PedidoRepositoryImpl implements PedidoRepository {
                         p.setEstadoActual(new EstadoPendiente());
                         break;
                 }
+                p.setDetalles(obtenerDetalles(p.getId()));
+                p.calcularTotal();
                 pedidos.add(p);
             }
         } catch (SQLException e) {
@@ -134,20 +139,91 @@ public class PedidoRepositoryImpl implements PedidoRepository {
         }
         return pedidos;
     }
+    
+    @Override
+public List<Pedido> obtenerPedidosFacturacion() {
 
+    List<Pedido> pedidos = new ArrayList<>();
+
+    String sql =
+        "SELECT id, mesa_id, estado, fecha_creacion "
+      + "FROM pedidos "
+      + "WHERE estado IN ('ENTREGADO', 'FACTURADO')";
+
+    try (
+        Connection conn =
+            ConexionBaseDatos.getInstancia().getConexion();
+
+        PreparedStatement stmt =
+            conn.prepareStatement(sql);
+
+        ResultSet rs = stmt.executeQuery()
+    ) {
+
+        while (rs.next()) {
+
+            Pedido p = new Pedido();
+
+            p.setId(rs.getInt("id"));
+            p.setNumeroMesa(
+                String.valueOf(
+                    rs.getInt("mesa_id"))
+            );
+
+            String estadoBd = rs.getString("estado");
+
+            switch (estadoBd) {
+
+                case "ENTREGADO":
+                    p.setEstadoActual(
+                        new EstadoEntregado());
+                    break;
+
+                case "FACTURADO":
+                    p.setEstadoActual(
+                        new EstadoFacturado());
+                    break;
+
+                default:
+                    continue;
+            }
+
+            p.setDetalles(
+                obtenerDetalles(p.getId()));
+
+            p.calcularTotal();
+
+            pedidos.add(p);
+        }
+
+    } catch (SQLException e) {
+        System.err.println(
+            "Error al obtener pedidos para facturación: "
+            + e.getMessage());
+    }
+
+    return pedidos;
+}
+    
     @Override
     public List<DetallePedido> obtenerDetalles(int idPedido) {
         List<DetallePedido> detalles = new ArrayList<>();
-        String sql = "SELECT dp.cantidad, p.nombre FROM detalles_pedido dp INNER JOIN productos p ON dp.producto_id = p.id WHERE dp.pedido_id = ?";
+        String sql = "SELECT dp.cantidad,dp.subtotal,p.nombre,p.precio FROM detalles_pedido dp INNER JOIN productos p ON dp.producto_id = p.id WHERE dp.pedido_id = ?";
         try (Connection conn = ConexionBaseDatos.getInstancia().getConexion(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idPedido);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     com.siar.modelo.Producto prod = new com.siar.modelo.Producto();
+
                     prod.setNombre(rs.getString("nombre"));
+                    prod.setPrecio(rs.getDouble("precio"));
+
                     DetallePedido dp = new DetallePedido();
+
                     dp.setProducto(prod);
                     dp.setCantidad(rs.getInt("cantidad"));
+                    dp.setSubtotal(rs.getDouble("subtotal"));
+
                     detalles.add(dp);
                 }
             }
@@ -156,5 +232,81 @@ public class PedidoRepositoryImpl implements PedidoRepository {
         }
         return detalles;
     }
+    
+@Override
+public List<Pedido> obtenerTodosLosPedidos() {
+
+    List<Pedido> pedidos = new ArrayList<>();
+
+    String sql =
+        "SELECT id, mesa_id, estado, fecha_creacion FROM pedidos";
+
+    try (Connection conn =
+            ConexionBaseDatos.getInstancia().getConexion();
+
+         PreparedStatement stmt =
+            conn.prepareStatement(sql);
+
+         ResultSet rs =
+            stmt.executeQuery()) {
+
+        while (rs.next()) {
+
+            Pedido p = new Pedido();
+
+            p.setId(rs.getInt("id"));
+            p.setNumeroMesa(
+                    String.valueOf(
+                            rs.getInt("mesa_id")));
+
+            String estadoBd =
+                    rs.getString("estado");
+
+            switch (estadoBd) {
+
+                case "EN_PREPARACION":
+                    p.setEstadoActual(
+                            new EstadoPreparacion());
+                    break;
+
+                case "LISTO":
+                    p.setEstadoActual(
+                            new EstadoListo());
+                    break;
+
+                case "ENTREGADO":
+                    p.setEstadoActual(
+                            new EstadoEntregado());
+                    break;
+
+                case "FACTURADO":
+                    p.setEstadoActual(
+                            new EstadoFacturado());
+                    break;
+
+                default:
+                    p.setEstadoActual(
+                            new EstadoPendiente());
+                    break;
+            }
+
+            p.setDetalles(
+                    obtenerDetalles(
+                            p.getId()));
+
+            p.calcularTotal();
+
+            pedidos.add(p);
+        }
+
+    } catch (SQLException e) {
+
+        System.err.println(
+            "Error al obtener pedidos: "
+            + e.getMessage());
+    }
+
+    return pedidos;
+}
 
 }

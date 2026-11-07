@@ -1,0 +1,14 @@
+=================================
+SIAR
+COMPROBANTE DE PAGO
+=================================
+
+Pedido: 13
+Mesa: 1
+
+Subtotal: $60000.0
+IVA (19%): $11400.0
+Descuento: $0
+TOTAL: $71400.0
+
+Gracias por su compra.

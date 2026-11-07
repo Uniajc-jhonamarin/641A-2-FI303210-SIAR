@@ -13,5 +13,7 @@ public interface PedidoRepository {
     List<Pedido> obtenerPedidosActivos(); // Para la cocina (KDS) y meseros
 
     List<DetallePedido> obtenerDetalles(int idPedido);
-
+    
+    List<Pedido> obtenerPedidosFacturacion();
+    List<Pedido> obtenerTodosLosPedidos();
 }
