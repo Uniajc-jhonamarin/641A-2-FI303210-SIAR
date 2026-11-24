@@ -7,11 +7,14 @@ import com.siar.vista.VistaPedido;
 import com.siar.vista.VistaProducto;
 import com.siar.vista.VistaCocina;
 import com.siar.vista.VistaFacturacion;
+import com.siar.vista.VistaUsuario;
 
+import com.siar.servicio.UsuarioService;
 import com.siar.servicio.AuthService;
 import com.siar.servicio.PedidoService;
 import com.siar.servicio.ProductoService;
 
+import com.siar.persistencia.RolRepositoryImpl;
 import com.siar.persistencia.UsuarioRepositoryImpl;
 import com.siar.persistencia.CategoriaRepositoryImpl;
 import com.siar.persistencia.ProductoRepositoryImpl;
@@ -81,14 +84,15 @@ public class ControladorDashboard {
                 abrirModuloPedidos();
             }
         });
-        
+
         vista.getMenuSeguimientoPedidos()
-     .addActionListener(
-        e -> abrirModuloSeguimientoPedidos()
-     );
+                .addActionListener(
+                        e -> abrirModuloSeguimientoPedidos()
+                );
 
         vista.getMenuCocina().addActionListener(e -> abrirModuloCocina());
         vista.getMenuFacturacion().addActionListener(e -> abrirModuloFacturacion());
+        vista.getMenuUsuarios().addActionListener(e -> abrirModuloUsuarios());
     }
 
     private void cerrarSesion() {
@@ -151,24 +155,37 @@ public class ControladorDashboard {
 
     private void abrirModuloSeguimientoPedidos() {
 
-    VistaSeguimientoPedidos vistaSeguimiento =
-            new VistaSeguimientoPedidos();
+        VistaSeguimientoPedidos vistaSeguimiento
+                = new VistaSeguimientoPedidos();
 
-    new ControladorSeguimientoPedidos(
-            vistaSeguimiento,
-            new PedidoService(
-                    new PedidoRepositoryImpl()));
+        new ControladorSeguimientoPedidos(
+                vistaSeguimiento,
+                new PedidoService(
+                        new PedidoRepositoryImpl()));
 
-    vista.getPanelContenido().add(
-            vistaSeguimiento,
-            "ModuloSeguimientoPedidos");
+        vista.getPanelContenido().add(
+                vistaSeguimiento,
+                "ModuloSeguimientoPedidos");
 
-    CardLayout cl =
-            (CardLayout) vista.getPanelContenido()
-                              .getLayout();
+        CardLayout cl
+                = (CardLayout) vista.getPanelContenido()
+                        .getLayout();
 
-    cl.show(
-            vista.getPanelContenido(),
-            "ModuloSeguimientoPedidos");
-}
+        cl.show(
+                vista.getPanelContenido(),
+                "ModuloSeguimientoPedidos");
+    }
+    
+    private void abrirModuloUsuarios() {
+        UsuarioService usuarioService = new UsuarioService(
+                new UsuarioRepositoryImpl(),
+                new RolRepositoryImpl()
+        );
+        VistaUsuario vistaUsuario = new VistaUsuario();
+        new ControladorUsuario(vistaUsuario, usuarioService);
+
+        vista.getPanelContenido().add(vistaUsuario, "ModuloUsuarios");
+        CardLayout cl = (CardLayout) vista.getPanelContenido().getLayout();
+        cl.show(vista.getPanelContenido(), "ModuloUsuarios");
+    }
 }
