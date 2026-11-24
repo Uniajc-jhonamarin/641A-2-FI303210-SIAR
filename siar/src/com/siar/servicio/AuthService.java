@@ -24,8 +24,8 @@ public class AuthService {
 
         // Se compara la contraseña escrita por el usuario contra el Hash de la BD
         if (BCrypt.checkpw(passwordPlano, usuario.getPasswordHash())) {
-            // Si coincide, registramos al usuario en la sesión global (Singleton)
             SesionActual.getInstancia().setUsuarioActual(usuario);
+            new AuditoriaService().registrarEvento("LOGIN", "Inicio de sesión exitoso");
             return true;
         }
 
@@ -33,6 +33,7 @@ public class AuthService {
     }
 
     public void cerrarSesion() {
+        new AuditoriaService().registrarEvento("LOGOUT", "Cierre de sesión");
         SesionActual.getInstancia().cerrarSesion();
     }
 
