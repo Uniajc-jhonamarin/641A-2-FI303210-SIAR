@@ -8,6 +8,7 @@ public class VistaLogin extends JFrame {
     private JTextField txtEmail;
     private JPasswordField txtPassword;
     private JButton btnIngresar;
+    private JButton btnRecuperar;
 
     public VistaLogin() {
         inicializarComponentes();
@@ -15,13 +16,13 @@ public class VistaLogin extends JFrame {
 
     private void inicializarComponentes() {
         setTitle("SIAR - Inicio de Sesión");
-        setSize(350, 250);
+        setSize(360, 260);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null); // Centrar en pantalla
         setResizable(false);
 
         // Panel principal con márgenes
-        JPanel panelPrincipal = new JPanel(new GridLayout(4, 1, 10, 10));
+        JPanel panelPrincipal = new JPanel(new GridLayout(5, 1, 10, 10));
         panelPrincipal.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
         // Título
@@ -50,6 +51,12 @@ public class VistaLogin extends JFrame {
         panelBoton.add(btnIngresar);
         panelPrincipal.add(panelBoton);
 
+        JPanel panelRecuperar = new JPanel();
+        btnRecuperar = new JButton("¿Olvidaste tu contraseña?");
+        btnRecuperar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        panelRecuperar.add(btnRecuperar);
+        panelPrincipal.add(panelRecuperar);
+
         add(panelPrincipal);
     }
 
@@ -68,5 +75,9 @@ public class VistaLogin extends JFrame {
 
     public void mostrarMensaje(String mensaje, String titulo, int tipo) {
         JOptionPane.showMessageDialog(this, mensaje, titulo, tipo);
+    }
+
+    public JButton getBtnRecuperar() {
+        return btnRecuperar;
     }
 }

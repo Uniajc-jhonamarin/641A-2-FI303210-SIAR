@@ -1,5 +1,11 @@
 package com.siar.controlador;
 
+import com.siar.modelo.Factura;
+import com.siar.servicio.ComprobanteService;
+import com.siar.vista.VistaPreviaComprobante;
+import java.awt.Window;
+import java.io.File;
+
 import com.siar.modelo.Pedido;
 import com.siar.servicio.PedidoService;
 import com.siar.vista.VistaFacturacion;
@@ -16,6 +22,7 @@ public class ControladorFacturacion {
     private final PedidoService pedidoService;
     private List<Pedido> pedidosActivos;
     private List<Pedido> pedidosVisibles;
+    private final ComprobanteService comprobanteService = new ComprobanteService();
 
     public ControladorFacturacion(VistaFacturacion vista, PedidoService pedidoService) {
         this.vista = vista;
@@ -29,86 +36,86 @@ public class ControladorFacturacion {
         vista.getBtnEmitirComprobante().setEnabled(false);
         pedidosActivos = pedidoService.obtenerPedidosFacturacion();
         pedidosVisibles = new java.util.ArrayList<>();
-        String filtro =
-        vista.getCmbFiltroEstado()
-         .getSelectedItem()
-         .toString();
+        String filtro
+                = vista.getCmbFiltroEstado()
+                        .getSelectedItem()
+                        .toString();
         if (filtro.equals("FACTURADOS")) {
 
-    vista.getBtnFacturar()
-         .setEnabled(false);
+            vista.getBtnFacturar()
+                    .setEnabled(false);
 
-} else {
+        } else {
 
-    vista.getBtnFacturar()
-         .setEnabled(true);
-}
+            vista.getBtnFacturar()
+                    .setEnabled(true);
+        }
 
         for (Pedido p : pedidosActivos) {
 
-    String estado =
-        p.getEstadoActual().getNombre();
+            String estado
+                    = p.getEstadoActual().getNombre();
 
-    if (filtro.equals("ENTREGADOS")
-            && !estado.equals("ENTREGADO")) {
-        continue;
-    }
+            if (filtro.equals("ENTREGADOS")
+                    && !estado.equals("ENTREGADO")) {
+                continue;
+            }
 
-    if (filtro.equals("FACTURADOS")
-            && !estado.equals("FACTURADO")) {
-        continue;
-    }
+            if (filtro.equals("FACTURADOS")
+                    && !estado.equals("FACTURADO")) {
+                continue;
+            }
 
-    vista.getModeloPedidos().addRow(
-        new Object[]{
-            p.getId(),
-            "Mesa " + p.getNumeroMesa(),
-            estado
-        });
-    pedidosVisibles.add(p);
-}
+            vista.getModeloPedidos().addRow(
+                    new Object[]{
+                        p.getId(),
+                        "Mesa " + p.getNumeroMesa(),
+                        estado
+                    });
+            pedidosVisibles.add(p);
+        }
     }
 
     private void inicializarEventos() {
 
         vista.getBtnFacturar()
-            .addActionListener(e -> facturarPedido());
+                .addActionListener(e -> facturarPedido());
 
         vista.getBtnEmitirComprobante()
-            .addActionListener(e -> emitirComprobante());
-        
+                .addActionListener(e -> emitirComprobante());
+
         vista.getCmbFiltroEstado()
-        .addActionListener(
-                e -> cargarPedidos()
-        );
-        
+                .addActionListener(
+                        e -> cargarPedidos()
+                );
+
         vista.getTablaPedidos()
-     .getSelectionModel()
-     .addListSelectionListener(e -> {
+                .getSelectionModel()
+                .addListSelectionListener(e -> {
 
-         int fila =
-             vista.getTablaPedidos().getSelectedRow();
+                    int fila
+                            = vista.getTablaPedidos().getSelectedRow();
 
-         if (fila == -1) {
-             return;
-         }
+                    if (fila == -1) {
+                        return;
+                    }
 
-         Pedido p =
-             pedidosVisibles.get(fila);
+                    Pedido p
+                            = pedidosVisibles.get(fila);
 
-         if (p.getEstadoActual()
-              .getNombre()
-              .equals("FACTURADO")) {
+                    if (p.getEstadoActual()
+                            .getNombre()
+                            .equals("FACTURADO")) {
 
-             vista.getBtnEmitirComprobante()
-                  .setEnabled(true);
+                        vista.getBtnEmitirComprobante()
+                                .setEnabled(true);
 
-         } else {
+                    } else {
 
-             vista.getBtnEmitirComprobante()
-                  .setEnabled(false);
-         }
-     });
+                        vista.getBtnEmitirComprobante()
+                                .setEnabled(false);
+                    }
+                });
 
     }
 
@@ -120,15 +127,15 @@ public class ControladorFacturacion {
         }
 
         Pedido p = pedidosVisibles.get(fila);
-        
+
         System.out.println("Pedido: " + p.getId());
         System.out.println("Detalles: " + p.getDetalles().size());
-        
+
         p.calcularTotal();
         System.out.println("Total: " + p.getTotal());
-        
+
         p.calcularTotal();
-        
+
         double subtotal = p.getTotal();
 
         vista.mostrarFactura(
@@ -147,77 +154,47 @@ public class ControladorFacturacion {
         // Avanza de ENTREGADO -> FACTURADO
         if (pedidoService.avanzarEstado(p)) {
 
+            vista.mostrarMensaje(
+                    "Pedido #" + p.getId()
+                    + " pagado y facturado con éxito.",
+                    "Cobro Exitoso",
+                    JOptionPane.INFORMATION_MESSAGE);
 
-
-    vista.mostrarMensaje(
-        "Pedido #" + p.getId() +
-        " pagado y facturado con éxito.",
-        "Cobro Exitoso",
-        JOptionPane.INFORMATION_MESSAGE);
-
-    cargarPedidos();
-} else {
+            cargarPedidos();
+        } else {
             vista.mostrarMensaje("Error al procesar la factura.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
     private void emitirComprobante() {
+        int fila = vista.getTablaPedidos().getSelectedRow();
+        if (fila == -1) {
+            vista.mostrarMensaje("Seleccione un pedido.", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-    int fila = vista.getTablaPedidos().getSelectedRow();
+        try {
+            Pedido p = pedidosVisibles.get(fila);
 
-    if (fila == -1) {
-        vista.mostrarMensaje(
-                "Seleccione un pedido.",
-                "Atención",
-                JOptionPane.WARNING_MESSAGE);
-        return;
+            // 1. Construir la Factura usando el modelo y las reglas de negocio
+            Factura factura = comprobanteService.construirFactura(p);
+
+            // 2. Generar HTML y guardarlo en la carpeta comprobantes/
+            String html = comprobanteService.generarHtmlComprobante(p, factura);
+            File archivo = comprobanteService.guardarComprobanteHtml(p.getId(), html);
+
+            // 3. Mostrar la vista previa profesional con opción de Imprimir / PDF
+            Window ventanaPadre = SwingUtilities.getWindowAncestor(vista);
+            VistaPreviaComprobante preview = new VistaPreviaComprobante(ventanaPadre, html, archivo);
+            preview.setVisible(true);
+
+        } catch (IOException e) {
+            vista.mostrarMensaje(
+                    "Error al generar comprobante: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 
-    try {
-
-        Pedido p = pedidosVisibles.get(fila);
-
-        p.calcularTotal();
-
-        double subtotal = p.getTotal();
-        double iva = subtotal * 0.19;
-        double total = subtotal + iva;
-
-        String nombreArchivo =
-                "comprobante_pedido_" + p.getId() + ".txt";
-
-        FileWriter writer =
-                new FileWriter(nombreArchivo);
-
-        writer.write("=================================\n");
-        writer.write("SIAR\n");
-        writer.write("COMPROBANTE DE PAGO\n");
-        writer.write("=================================\n\n");
-
-        writer.write("Pedido: " + p.getId() + "\n");
-        writer.write("Mesa: " + p.getNumeroMesa() + "\n\n");
-
-        writer.write("Subtotal: $" + subtotal + "\n");
-        writer.write("IVA (19%): $" + iva + "\n");
-        writer.write("Descuento: $0\n");
-        writer.write("TOTAL: $" + total + "\n\n");
-
-        writer.write("Gracias por su compra.\n");
-
-        writer.close();
-
-        vista.mostrarMensaje(
-                "Comprobante generado:\n"
-                + nombreArchivo,
-                "Éxito",
-                JOptionPane.INFORMATION_MESSAGE);
-
-    } catch (IOException e) {
-
-        vista.mostrarMensaje(
-                "Error al generar comprobante.",
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
-    }
-}
-    
 }
