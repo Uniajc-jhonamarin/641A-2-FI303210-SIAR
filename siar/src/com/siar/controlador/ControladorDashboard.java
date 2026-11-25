@@ -31,6 +31,8 @@ import com.siar.controlador.ControladorSeguimientoPedidos;
 public class ControladorDashboard {
 
     private final VistaDashboard vista;
+    // Como atributo de la clase ControladorDashboard:
+    private final PedidoService pedidoService = new PedidoService(new PedidoRepositoryImpl());
 
     public ControladorDashboard(VistaDashboard vista) {
         this.vista = vista;
@@ -107,29 +109,22 @@ public class ControladorDashboard {
     }
 
     private void abrirModuloProductos() {
-        // 1. Instanciar dependencias del módulo
         ProductoService productoService = new ProductoService(new ProductoRepositoryImpl(), new CategoriaRepositoryImpl());
 
-        // 2. Crear la vista y su controlador
         VistaProducto vistaProducto = new VistaProducto();
         new ControladorProducto(vistaProducto, productoService);
 
-        // 3. Añadir el panel al Dashboard y mostrarlo
         vista.getPanelContenido().add(vistaProducto, "ModuloProductos");
         CardLayout cl = (CardLayout) vista.getPanelContenido().getLayout();
         cl.show(vista.getPanelContenido(), "ModuloProductos");
     }
-
+    
     private void abrirModuloPedidos() {
-        // 1. Instanciar dependencias
-        PedidoService pedidoService = new PedidoService(new PedidoRepositoryImpl());
         ProductoService productoService = new ProductoService(new ProductoRepositoryImpl(), new CategoriaRepositoryImpl());
 
-        // 2. Crear Vista y Controlador
         VistaPedido vistaPedido = new VistaPedido();
-        new ControladorPedido(vistaPedido, pedidoService, productoService);
+        new ControladorPedido(vistaPedido, this.pedidoService, productoService);
 
-        // 3. Añadir al Dashboard
         vista.getPanelContenido().add(vistaPedido, "ModuloPedidos");
         CardLayout cl = (CardLayout) vista.getPanelContenido().getLayout();
         cl.show(vista.getPanelContenido(), "ModuloPedidos");
@@ -137,45 +132,31 @@ public class ControladorDashboard {
 
     private void abrirModuloCocina() {
         VistaCocina vistaCocina = new VistaCocina();
-        new ControladorCocina(vistaCocina, new PedidoService(new PedidoRepositoryImpl()));
+        new ControladorCocina(vistaCocina, this.pedidoService);
 
         vista.getPanelContenido().add(vistaCocina, "ModuloCocina");
-        java.awt.CardLayout cl = (java.awt.CardLayout) vista.getPanelContenido().getLayout();
+        CardLayout cl = (CardLayout) vista.getPanelContenido().getLayout();
         cl.show(vista.getPanelContenido(), "ModuloCocina");
     }
 
     private void abrirModuloFacturacion() {
         VistaFacturacion vistaFacturacion = new VistaFacturacion();
-        new ControladorFacturacion(vistaFacturacion, new PedidoService(new PedidoRepositoryImpl()));
+        new ControladorFacturacion(vistaFacturacion, this.pedidoService);
 
         vista.getPanelContenido().add(vistaFacturacion, "ModuloFacturacion");
-        java.awt.CardLayout cl = (java.awt.CardLayout) vista.getPanelContenido().getLayout();
+        CardLayout cl = (CardLayout) vista.getPanelContenido().getLayout();
         cl.show(vista.getPanelContenido(), "ModuloFacturacion");
     }
 
     private void abrirModuloSeguimientoPedidos() {
+        VistaSeguimientoPedidos vistaSeguimiento = new VistaSeguimientoPedidos();
+        new ControladorSeguimientoPedidos(vistaSeguimiento, this.pedidoService);
 
-        VistaSeguimientoPedidos vistaSeguimiento
-                = new VistaSeguimientoPedidos();
-
-        new ControladorSeguimientoPedidos(
-                vistaSeguimiento,
-                new PedidoService(
-                        new PedidoRepositoryImpl()));
-
-        vista.getPanelContenido().add(
-                vistaSeguimiento,
-                "ModuloSeguimientoPedidos");
-
-        CardLayout cl
-                = (CardLayout) vista.getPanelContenido()
-                        .getLayout();
-
-        cl.show(
-                vista.getPanelContenido(),
-                "ModuloSeguimientoPedidos");
+        vista.getPanelContenido().add(vistaSeguimiento, "ModuloSeguimientoPedidos");
+        CardLayout cl = (CardLayout) vista.getPanelContenido().getLayout();
+        cl.show(vista.getPanelContenido(), "ModuloSeguimientoPedidos");
     }
-    
+
     private void abrirModuloUsuarios() {
         UsuarioService usuarioService = new UsuarioService(
                 new UsuarioRepositoryImpl(),

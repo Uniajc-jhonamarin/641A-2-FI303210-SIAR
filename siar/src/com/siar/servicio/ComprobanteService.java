@@ -13,6 +13,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
+import com.siar.patrones.estrategia.*;
 
 public class ComprobanteService {
 
@@ -26,18 +27,21 @@ public class ComprobanteService {
         pedido.calcularTotal();
         double subtotal = pedido.getTotal();
 
-        // Regla de negocio sincronizada con VistaFacturacion: 10% de descuento si subtotal >= 50.000
-        double descuento = (subtotal >= 50000) ? subtotal * 0.10 : 0.0;
+        EstrategiaDescuento estrategia = (subtotal >= 50000)
+                ? new DescuentoPorcentaje(0.10)
+                : new SinDescuento();
 
         Factura factura = new Factura();
         factura.setIdPedido(pedido.getId());
         factura.setSubtotal(subtotal);
-        factura.setDescuento(descuento);
+        factura.setEstrategiaDescuento(estrategia);
+        factura.aplicarDescuento();
         return factura;
     }
 
     /**
-     * Genera el contenido HTML compatible tanto con Swing (JEditorPane) como con navegadores web.
+     * Genera el contenido HTML compatible tanto con Swing (JEditorPane) como
+     * con navegadores web.
      */
     public String generarHtmlComprobante(Pedido pedido, Factura factura) {
         Usuario cajero = SesionActual.getInstancia().getUsuarioActual();
@@ -60,7 +64,6 @@ public class ComprobanteService {
                 + "</head>"
                 + "<body style='font-family: Arial, sans-serif; color: #222; margin: 15px;'>"
                 + "<div style='width: 360px; margin: 0 auto; border: 1px solid #ccc; padding: 16px; background: #fff;'>"
-
                 // Encabezado
                 + "<div style='text-align: center; border-bottom: 2px solid #2c3e50; padding-bottom: 10px;'>"
                 + "<h2 style='margin: 0; color: #2c3e50;'>SIAR RESTAURANTE</h2>"
@@ -68,7 +71,6 @@ public class ComprobanteService {
                 + "<p style='margin: 2px 0; font-size: 11px; color: #555;'>NIT: 900.123.456-7 | Régimen Común</p>"
                 + "<p style='margin: 6px 0 0 0; font-size: 12px; font-weight: bold;'>COMPROBANTE DE PAGO #" + String.format("%05d", pedido.getId()) + "</p>"
                 + "</div>"
-
                 // Datos de la orden
                 + "<table style='width: 100%; font-size: 11px; margin-top: 10px; border-bottom: 1px dashed #999; padding-bottom: 8px;'>"
                 + "<tr><td><b>Fecha:</b></td><td style='text-align:right;'>" + factura.getFecha().format(FORMATO_FECHA) + "</td></tr>"
@@ -76,7 +78,6 @@ public class ComprobanteService {
                 + "<tr><td><b>Mesa:</b></td><td style='text-align:right;'>Mesa " + pedido.getNumeroMesa() + "</td></tr>"
                 + "<tr><td><b>Atendido por:</b></td><td style='text-align:right;'>" + escaparHtml(nombreCajero) + "</td></tr>"
                 + "</table>"
-
                 // Tabla de productos
                 + "<table style='width: 100%; font-size: 11px; margin-top: 10px; border-collapse: collapse;'>"
                 + "<thead>"
@@ -91,7 +92,6 @@ public class ComprobanteService {
                 + filasProductos
                 + "</tbody>"
                 + "</table>"
-
                 // Totales
                 + "<table style='width: 100%; font-size: 12px; margin-top: 12px; border-top: 1px dashed #999; padding-top: 8px;'>"
                 + "<tr><td>Subtotal:</td><td style='text-align:right;'>" + FORMATO_MONEDA.format(factura.getSubtotal()) + "</td></tr>"
@@ -102,13 +102,11 @@ public class ComprobanteService {
                 + "<td style='padding-top: 8px; border-top: 2px solid #2c3e50; text-align:right;'>" + FORMATO_MONEDA.format(factura.getTotal()) + "</td>"
                 + "</tr>"
                 + "</table>"
-
                 // Pie de página
                 + "<div style='text-align: center; margin-top: 16px; padding-top: 8px; border-top: 1px solid #eee; font-size: 11px; color: #666;'>"
                 + "<p style='margin: 2px 0;'><b>¡Gracias por su preferencia!</b></p>"
                 + "<p style='margin: 2px 0;'>Documento generado electrónicamente por SIAR</p>"
                 + "</div>"
-
                 + "</div>"
                 + "</body></html>";
     }
@@ -130,9 +128,11 @@ public class ComprobanteService {
     }
 
     private String escaparHtml(String texto) {
-        if (texto == null) return "";
+        if (texto == null) {
+            return "";
+        }
         return texto.replace("&", "&amp;")
-                    .replace("<", "&lt;")
-                    .replace(">", "&gt;");
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
     }
 }
