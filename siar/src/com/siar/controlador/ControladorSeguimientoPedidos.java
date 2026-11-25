@@ -23,6 +23,9 @@ public class ControladorSeguimientoPedidos {
 
         this.vista = vista;
         this.pedidoService = pedidoService;
+        this.pedidoService.agregarObservador(
+                new com.siar.patrones.observador.NotificadorMesero(this::cargarPedidos)
+        );
 
         cargarPedidos();
         inicializarEventos();
@@ -32,7 +35,7 @@ public class ControladorSeguimientoPedidos {
 
         vista.getModeloPedidos().setRowCount(0);
 
-        pedidos =pedidoService.obtenerTodosLosPedidos();
+        pedidos = pedidoService.obtenerTodosLosPedidos();
 
         for (Pedido p : pedidos) {
 
@@ -54,19 +57,19 @@ public class ControladorSeguimientoPedidos {
                 .addMouseListener(
                         new MouseAdapter() {
 
-            @Override
-            public void mouseClicked(MouseEvent e) {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
 
-                mostrarDetallePedido();
-            }
-        });
+                        mostrarDetallePedido();
+                    }
+                });
     }
 
     private void mostrarDetallePedido() {
 
-        int fila =
-                vista.getTablaPedidos()
-                     .getSelectedRow();
+        int fila
+                = vista.getTablaPedidos()
+                        .getSelectedRow();
 
         if (fila == -1) {
             return;
@@ -75,10 +78,10 @@ public class ControladorSeguimientoPedidos {
         Pedido pedido = pedidos.get(fila);
 
         vista.getModeloDetalles()
-             .setRowCount(0);
+                .setRowCount(0);
 
-        List<DetallePedido> detalles =
-                pedidoService.obtenerDetalles(
+        List<DetallePedido> detalles
+                = pedidoService.obtenerDetalles(
                         pedido.getId());
 
         double total = 0;
@@ -86,17 +89,17 @@ public class ControladorSeguimientoPedidos {
         for (DetallePedido dp : detalles) {
 
             vista.getModeloDetalles()
-                 .addRow(
-                    new Object[]{
-                        dp.getCantidad(),
-                        dp.getProducto().getNombre(),
-                        dp.getSubtotal()
-                    });
+                    .addRow(
+                            new Object[]{
+                                dp.getCantidad(),
+                                dp.getProducto().getNombre(),
+                                dp.getSubtotal()
+                            });
 
             total += dp.getSubtotal();
         }
 
         vista.getLblTotal()
-             .setText("Total: $" + total);
+                .setText("Total: $" + total);
     }
 }

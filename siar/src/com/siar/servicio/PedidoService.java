@@ -2,12 +2,15 @@ package com.siar.servicio;
 
 import com.siar.modelo.Pedido;
 import com.siar.repositorio.PedidoRepository;
+import com.siar.patrones.observador.ObservadorPedido;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class PedidoService {
 
     private final PedidoRepository pedidoRepo;
+    private final List<ObservadorPedido> observadores = new ArrayList<>();
 
     public PedidoService(PedidoRepository pedidoRepo) {
         this.pedidoRepo = pedidoRepo;
@@ -20,9 +23,12 @@ public class PedidoService {
         if (pedido.getNumeroMesa() == null || pedido.getNumeroMesa().trim().isEmpty()) {
             return false;
         }
-
-        pedido.calcularTotal(); // Asegurar que el total esté actualizado
-        return pedidoRepo.guardarPedido(pedido);
+        
+        boolean guardado = pedidoRepo.guardarPedido(pedido);
+        if (guardado) {
+            notificarObservadores(pedido);
+        }
+        return guardado;
     }
 
     public boolean avanzarEstado(Pedido pedido) {
@@ -32,15 +38,18 @@ public class PedidoService {
 
         // 1. Actualizamos lógicamente el objeto usando el Patrón State
         pedido.procesarSiguienteEstado();
-
-        // 2. Persistimos el nuevo estado en la base de datos
-        return pedidoRepo.actualizarEstado(pedido.getId(), pedido.getEstadoActual().getNombre());
+        
+        boolean actualizado = pedidoRepo.actualizarEstado(pedido.getId(), pedido.getEstadoActual().getNombre());
+        if (actualizado) {
+            notificarObservadores(pedido);
+        }
+        return actualizado;
     }
 
     public List<Pedido> obtenerPedidosPendientes() {
         return pedidoRepo.obtenerPedidosActivos();
     }
-    
+
     public List<Pedido> obtenerPedidosFacturacion() {
         return pedidoRepo.obtenerPedidosFacturacion();
     }
@@ -48,7 +57,24 @@ public class PedidoService {
     public List<com.siar.modelo.DetallePedido> obtenerDetalles(int idPedido) {
         return pedidoRepo.obtenerDetalles(idPedido);
     }
+
     public List<Pedido> obtenerTodosLosPedidos() {
-    return pedidoRepo.obtenerTodosLosPedidos();
-}
+        return pedidoRepo.obtenerTodosLosPedidos();
+    }
+
+    public void agregarObservador(ObservadorPedido observador) {
+        if (observador != null && !observadores.contains(observador)) {
+            observadores.add(observador);
+        }
+    }
+
+    public void eliminarObservador(ObservadorPedido observador) {
+        observadores.remove(observador);
+    }
+
+    public void notificarObservadores(Pedido pedido) {
+        for (ObservadorPedido obs : observadores) {
+            obs.actualizar(pedido);
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package com.siar.modelo;
 
 import java.time.LocalDateTime;
+import com.siar.patrones.estrategia.*;
 
 public class Factura {
 
@@ -9,6 +10,8 @@ public class Factura {
     private LocalDateTime fecha;
     private double subtotal;
     private double descuento;
+
+    private EstrategiaDescuento estrategiaDescuento = new SinDescuento();
 
     public Factura() {
         this.fecha = LocalDateTime.now();
@@ -68,5 +71,17 @@ public class Factura {
 
     public double getTotal() {
         return calcularTotal();
+    }
+
+    public void setEstrategiaDescuento(EstrategiaDescuento estrategia) {
+        this.estrategiaDescuento = (estrategia != null) ? estrategia : new SinDescuento();
+    }
+
+    public EstrategiaDescuento getEstrategiaDescuento() {
+        return estrategiaDescuento;
+    }
+
+    public void aplicarDescuento() {
+        this.descuento = estrategiaDescuento.calcularDescuento(this.subtotal);
     }
 }
